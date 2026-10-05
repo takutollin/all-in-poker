@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ALL IN POKER</title>
 <style>
@@ -19,6 +18,39 @@ button{margin:7px;padding:14px 27px;border:0;border-radius:10px;color:#fff;font-
 .modal{display:none;position:fixed;inset:0;background:#000b;z-index:10;align-items:center;justify-content:center;padding:12px}.modal.open{display:flex}.box{background:#102d23;border-radius:16px;width:min(780px,97vw);max-height:90vh;overflow:auto;padding:18px}.head{display:flex;justify-content:space-between;align-items:center}.head h2{margin:0}.close{background:#475569;padding:8px 13px}
 .srow{display:grid;grid-template-columns:42px repeat(13,1fr);gap:5px;margin:7px 0;align-items:center}.slab{font-size:25px;font-weight:bold}.pick{padding:9px 2px;margin:0;background:#f8fafc;color:#111;border-radius:7px;font-size:14px}.pick.r{color:#d52b2b}.pick:disabled{background:#64748b;color:#cbd5e1}
 @media(max-width:700px){h1{font-size:35px}.players{grid-template-columns:1fr 1fr;gap:7px}.player{padding:7px}.player h2{font-size:16px}.card,.placeholder{width:54px;height:78px;font-size:19px}.player-equity{font-size:16px}.srow{grid-template-columns:30px repeat(7,1fr)}.pick{font-size:12px}}
+
+
+.player.winner{
+  border:2px solid #ffd700;
+  background:#ffd70012;
+  animation:winnerGlow 1.2s ease-out forwards;
+}
+
+@keyframes winnerGlow{
+  0%{
+    transform:scale(1);
+    box-shadow:0 0 0 #ffd700;
+  }
+  30%{
+    transform:scale(1.025);
+    box-shadow:
+      0 0 20px #ffd700,
+      0 0 45px #ffd700aa;
+  }
+  60%{
+    transform:scale(1);
+    box-shadow:
+      0 0 8px #ffd700,
+      0 0 20px #ffd70080;
+  }
+  100%{
+    transform:scale(1);
+    box-shadow:
+      0 0 12px #ffd700,
+      0 0 28px #ffd70080;
+  }
+}
+
 </style></head><body>
 <div class="game">
 <h1>♠ ALL IN ♠</h1><div class="subtitle">POKER DUEL</div>
@@ -58,7 +90,7 @@ function add(extra){let w=winners(extra).win,share=1/w.length;w.forEach(i=>share
 if(need===0){add([]);setEq(shares,total,"RIVER：勝敗確定");return}
 if(need<=2){for(let x of combos(rem,need))add(x);if(token!==calcToken)return;setEq(shares,total,need===2?"FLOP：残り全組み合わせを正確に計算":"TURN：残り全カードを正確に計算");return}
 const N=20000;for(let n=0;n<N;n++){let pool=rem.slice();shuffle(pool);add(pool.slice(0,need))}if(token!==calcToken)return;setEq(shares,total,"")}
-function finalResult(){let x=winners(),names=x.win.map(i=>"PLAYER "+(i+1));if(x.win.length===1)res.innerHTML="🏆 "+names[0]+" WIN !!<span class='hand-name'>"+x.hs[x.win[0]].name+"</span>";else res.innerHTML="🤝 SPLIT POT："+names.join(" / ")+"<span class='hand-name'>"+x.hs[x.win[0]].name+"</span>"}
-async function nextStage(){action.disabled=true;random.disabled=true;count.disabled=true;if(stage==="pre"){deck=remaining();shuffle(deck);board.push(deck.pop(),deck.pop(),deck.pop());stage="flop";showBoard();res.textContent="FLOP";await updateEquity();action.textContent="TURNをめくる"}else if(stage==="flop"){board.push(deck.pop());stage="turn";showBoard();res.textContent="TURN";await updateEquity();action.textContent="RIVERをめくる"}else if(stage==="turn"){board.push(deck.pop());stage="river";showBoard();res.textContent="RIVER";await updateEquity();finalResult();action.textContent="勝負終了";action.disabled=true;random.disabled=false;count.disabled=false;renderPlayers();return}action.disabled=false;random.disabled=false;renderPlayers()}
+function finalResult(){let x=winners(),names=x.win.map(i=>"PLAYER "+(i+1));document.querySelectorAll(".player").forEach(el=>el.classList.remove("winner"));x.win.forEach(i=>document.querySelectorAll(".player")[i].classList.add("winner"));if(x.win.length===1)res.innerHTML="🏆 "+names[0]+" WIN !!<span class='hand-name'>"+x.hs[x.win[0]].name+"</span>";else res.innerHTML="🤝 SPLIT POT："+names.join(" / ")+"<span class='hand-name'>"+x.hs[x.win[0]].name+"</span>"}
+async function nextStage(){action.disabled=true;random.disabled=true;count.disabled=true;if(stage==="pre"){deck=remaining();shuffle(deck);board.push(deck.pop(),deck.pop(),deck.pop());stage="flop";showBoard();res.textContent="FLOP";await updateEquity();action.textContent="TURNをめくる"}else if(stage==="flop"){board.push(deck.pop());stage="turn";showBoard();res.textContent="TURN";await updateEquity();action.textContent="RIVERをめくる"}else if(stage==="turn"){board.push(deck.pop());stage="river";showBoard();res.textContent="RIVER";await updateEquity();renderPlayers();finalResult();action.textContent="勝負終了";action.disabled=true;random.disabled=false;count.disabled=false;return}action.disabled=false;random.disabled=false;renderPlayers()}
 count.onchange=()=>{playerCount=+count.value;deal()};random.onclick=deal;action.onclick=nextStage;deal();
 </script></body></html>
