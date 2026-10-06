@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ALL IN POKER</title>
 <style>
@@ -52,29 +51,184 @@ button{margin:7px;padding:14px 27px;border:0;border-radius:10px;color:#fff;font-
   }
 }
 
+
+
+/* Baccarat-style squeeze reveal for community cards */
+.squeeze-card{position:relative;width:70px;height:100px;border-radius:9px;perspective:700px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;filter:drop-shadow(0 4px 10px #0006)}
+.squeeze-card:active{cursor:grabbing}
+.squeeze-face{position:absolute;inset:0;width:100%;height:100%;border-radius:9px;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;font-size:25px;font-weight:bold;overflow:hidden;opacity:0;z-index:1;pointer-events:none}
+.squeeze-face.red{color:#d52b2b}
+.squeeze-cover{position:absolute;inset:0;border-radius:9px;background:repeating-linear-gradient(45deg,#0d315f 0 8px,#174b88 8px 16px);border:3px solid #e8edf5;box-shadow:inset 0 0 0 2px #ffffff55;transform-origin:bottom center;will-change:transform,clip-path;transition:transform .16s ease-out,clip-path .16s ease-out,opacity .16s ease-out;z-index:2}
+.squeeze-cover::after{content:"♠";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;color:#fff;opacity:.85}
+.squeeze-card.squeezing .squeeze-face,.squeeze-card.revealed .squeeze-face{opacity:1}
+.squeeze-card.squeezing .squeeze-cover{transition:none}
+.squeeze-card.revealed{cursor:default}
+.squeeze-card.revealed .squeeze-cover{transform:translateY(-105%) rotateX(-22deg);clip-path:inset(0 0 100% 0);opacity:0;pointer-events:none}
+.squeeze-help{font-size:12px;color:#aebdb5;margin-top:7px;min-height:15px}
+@media(max-width:700px){.squeeze-card{width:54px;height:78px}.squeeze-face{font-size:19px}.squeeze-cover::after{font-size:28px}}
+
+
+/* Classic playing-card face */
+.card,.squeeze-face{position:relative;overflow:hidden;font-family:Georgia,"Times New Roman",serif}
+.playing-card{position:relative;width:100%;height:100%;background:#fff;color:#111;border-radius:inherit;overflow:hidden}
+.playing-card.red{color:#e53935}
+.pc-corner{position:absolute;z-index:3;display:flex;flex-direction:column;align-items:center;line-height:.82;font-weight:700;font-family:Arial,"Noto Sans JP",sans-serif}
+.pc-corner .rank{font-size:20px;letter-spacing:-1px}.pc-corner .suit{font-size:17px;margin-top:3px}.pc-corner.tl{top:6px;left:6px}.pc-corner.br{right:6px;bottom:6px;transform:rotate(180deg)}
+.pc-center{position:absolute;inset:10px 12px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(5,1fr);align-items:center;justify-items:center;font-size:20px;line-height:1}
+.pc-pip{position:absolute;transform:translate(-50%,-50%);font-size:20px;line-height:1}.pc-pip.flip{transform:translate(-50%,-50%) rotate(180deg)}
+.pc-ace{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:49px;line-height:1}
+.pc-face{position:absolute;left:18px;right:18px;top:15px;bottom:15px;border:1px solid #d8d8d8;border-radius:4px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f8f1d5,#fff 45%,#f4e5b4);overflow:hidden}
+.pc-face::before,.pc-face::after{content:"";position:absolute;width:65%;height:140%;background:repeating-linear-gradient(45deg,transparent 0 7px,currentColor 7px 9px);opacity:.08;transform:rotate(18deg)}
+.pc-face::after{transform:rotate(-18deg)}
+.pc-royal{position:relative;z-index:2;font-size:32px;font-weight:700;text-shadow:1px 1px 0 #fff}.pc-royal small{display:block;font-size:18px;margin-top:3px}
+@media(max-width:700px){.pc-corner .rank{font-size:15px}.pc-corner .suit{font-size:13px;margin-top:2px}.pc-corner.tl{top:4px;left:4px}.pc-corner.br{right:4px;bottom:4px}.pc-pip{font-size:15px}.pc-ace{font-size:37px}.pc-face{left:13px;right:13px;top:11px;bottom:11px}.pc-royal{font-size:24px}.pc-royal small{font-size:13px}}
+
+/* Keep pip symbols clear of the corner indexes, especially 10 */
+.pc-pip{z-index:1}
+.pc-corner{background:#fff;padding:1px 2px;border-radius:3px}
+.playing-card.red .pc-corner{background:#fff}
+@media(max-width:700px){.pc-corner{padding:0 1px}}
+
+
+/* Special 7-2 victory effect: horses race around the winner */
+.player.seven-two-win{
+  position:relative;
+  z-index:3;
+  overflow:visible;
+  border:3px solid #ffd700;
+  box-shadow:0 0 10px #ffd70088;
+}
+.player.seven-two-win::after{
+  content:"7-2 SPECIAL!";
+  position:absolute;
+  left:50%;
+  top:-18px;
+  transform:translateX(-50%);
+  padding:5px 12px;
+  border-radius:999px;
+  background:#ffd700;
+  color:#111;
+  font-size:13px;
+  font-weight:900;
+  white-space:nowrap;
+  box-shadow:0 0 14px #ffd70088;
+  z-index:8;
+  animation:sevenTwoBadge .7s ease-out both;
+}
+@keyframes sevenTwoBadge{
+  from{opacity:0;transform:translateX(-50%) translateY(10px) scale(.6)}
+  to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+}
+
+.horse-track{
+  position:absolute;
+  inset:-30px;
+  pointer-events:none;
+  z-index:7;
+  overflow:visible;
+}
+.horse-runner{
+  position:absolute;
+  left:0;
+  top:0;
+  font-size:30px;
+  line-height:1;
+  filter:drop-shadow(0 2px 4px #0008) drop-shadow(0 0 7px #ffd700aa);
+  will-change:left,top,transform;
+  animation:horseLap 4.2s linear infinite reverse;
+}
+.horse-runner:nth-child(2){animation-delay:-.84s}
+.horse-runner:nth-child(3){animation-delay:-1.68s}
+.horse-runner:nth-child(4){animation-delay:-2.52s}
+.horse-runner:nth-child(5){animation-delay:-3.36s}
+
+@keyframes horseLap{
+  0%{left:0;top:0;transform:translate(-50%,-50%) scaleX(1) rotate(0deg)}
+  23%{left:100%;top:0;transform:translate(-50%,-50%) scaleX(1) rotate(0deg)}
+  25%{left:100%;top:0;transform:translate(-50%,-50%) rotate(90deg)}
+  48%{left:100%;top:100%;transform:translate(-50%,-50%) rotate(90deg)}
+  50%{left:100%;top:100%;transform:translate(-50%,-50%) scaleX(-1) rotate(0deg)}
+  73%{left:0;top:100%;transform:translate(-50%,-50%) scaleX(-1) rotate(0deg)}
+  75%{left:0;top:100%;transform:translate(-50%,-50%) rotate(-90deg)}
+  98%{left:0;top:0;transform:translate(-50%,-50%) rotate(-90deg)}
+  100%{left:0;top:0;transform:translate(-50%,-50%) scaleX(1) rotate(0deg)}
+}
+
+@media(max-width:700px){
+  .horse-track{inset:-24px}
+  .horse-runner{font-size:24px}
+}
+
+.seven-two-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle,#ffd7001d 0,#00000000 55%);
+  animation:sevenTwoOverlay 1.8s ease-out forwards;
+}
+.seven-two-overlay .seven-two-text{
+  font-size:clamp(38px,9vw,92px);
+  font-weight:1000;
+  letter-spacing:2px;
+  color:#fff;
+  text-shadow:0 0 10px #fff,0 0 25px #ffd700,0 0 50px #ff6a00;
+  transform:rotate(-4deg);
+  animation:sevenTwoText 1.8s cubic-bezier(.2,.9,.2,1) forwards;
+}
+@keyframes sevenTwoOverlay{
+  0%{opacity:0}15%{opacity:1}72%{opacity:1}100%{opacity:0}
+}
+@keyframes sevenTwoText{
+  0%{opacity:0;transform:scale(.25) rotate(-10deg)}
+  22%{opacity:1;transform:scale(1.18) rotate(3deg)}
+  40%{transform:scale(.96) rotate(-2deg)}
+  70%{opacity:1;transform:scale(1) rotate(-4deg)}
+  100%{opacity:0;transform:scale(1.3) rotate(-4deg)}
+}
+
 </style></head><body>
 <div class="game">
 <h1>♠ ALL IN ♠</h1><div class="subtitle">POKER DUEL</div>
 <div class="setup"><label for="count">参加人数</label><select id="count"></select></div>
 <div class="players" id="players"></div>
 <div class="equity"><div class="small" id="method">勝率を計算中...</div></div>
-<div class="board-title">BOARD</div><div class="board" id="board"></div>
+<div class="board-title">BOARD</div><div class="board" id="board"></div><div class="squeeze-help" id="squeezeHelp"></div>
 <div class="result" id="result"></div>
 <button id="action">ALL IN !!</button><button id="random">ランダムで配る</button>
 </div>
 <div class="modal" id="modal"><div class="box"><div class="head"><h2>カードを選択</h2><button class="close" id="close">閉じる</button></div><div id="picker"></div></div></div>
 <script>
 const suits=["♠","♥","♦","♣"],ranks=[["A",14],["K",13],["Q",12],["J",11],["10",10],["9",9],["8",8],["7",7],["6",6],["5",5],["4",4],["3",3],["2",2]];
-let playerCount=2,players=[],board=[],deck=[],stage="pre",editing=null,calcToken=0;
-const $=id=>document.getElementById(id),playersEl=$("players"),be=$("board"),res=$("result"),modal=$("modal"),picker=$("picker"),action=$("action"),random=$("random"),count=$("count");
+let playerCount=2,players=[],board=[],deck=[],stage="pre",editing=null,calcToken=0,revealedBoard=0,revealBusy=false;
+const $=id=>document.getElementById(id),playersEl=$("players"),be=$("board"),res=$("result"),modal=$("modal"),picker=$("picker"),action=$("action"),random=$("random"),count=$("count"),squeezeHelp=$("squeezeHelp");
 for(let n=2;n<=8;n++){let o=document.createElement("option");o.value=n;o.textContent=n+"人";count.appendChild(o)}
 function makeDeck(){return suits.flatMap(s=>ranks.map(([rank,value])=>({suit:s,rank,value})))}function key(c){return c.rank+c.suit}
 function shuffle(a){for(let i=a.length-1;i;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
-function ce(c,click,p,i){let d=document.createElement("div");d.className="card"+("♥♦".includes(c.suit)?" red":"");d.textContent=key(c);if(click)d.onclick=()=>openPick(p,i);else d.style.cursor="default";return d}
+function cardFace(c){
+  let root=document.createElement("div");root.className="playing-card"+("♥♦".includes(c.suit)?" red":"");
+  const corner=pos=>{let z=document.createElement("div");z.className="pc-corner "+pos;z.innerHTML=`<span class="rank">${c.rank}</span><span class="suit">${c.suit}</span>`;return z};
+  root.append(corner("tl"),corner("br"));
+  if(c.rank==="A"){let a=document.createElement("div");a.className="pc-ace";a.textContent=c.suit;root.appendChild(a);return root}
+  if(["J","Q","K"].includes(c.rank)){let f=document.createElement("div");f.className="pc-face";let r=document.createElement("div");r.className="pc-royal";r.innerHTML=`${c.rank}<small>${c.suit}</small>`;f.appendChild(r);root.appendChild(f);return root}
+  const layouts={
+    "2":[[50,24],[50,76]],"3":[[50,20],[50,50],[50,80]],"4":[[30,25],[70,25],[30,75],[70,75]],
+    "5":[[30,22],[70,22],[50,50],[30,78],[70,78]],"6":[[30,20],[70,20],[30,50],[70,50],[30,80],[70,80]],
+    "7":[[30,18],[70,18],[50,35],[30,50],[70,50],[30,82],[70,82]],"8":[[30,17],[70,17],[50,33],[30,43],[70,43],[50,67],[30,83],[70,83]],
+    "9":[[30,16],[70,16],[30,35],[70,35],[50,50],[30,65],[70,65],[30,84],[70,84]],
+    "10":[[30,14],[70,14],[50,28],[30,37],[70,37],[30,63],[70,63],[50,72],[30,86],[70,86]]};
+  (layouts[c.rank]||[]).forEach(([x,y])=>{let p=document.createElement("span");p.className="pc-pip"+(y>50?" flip":"");p.style.left=x+"%";p.style.top=y+"%";p.textContent=c.suit;root.appendChild(p)});return root
+}
+function ce(c,click,p,i){let d=document.createElement("div");d.className="card";d.appendChild(cardFace(c));if(click)d.onclick=()=>openPick(p,i);else d.style.cursor="default";return d}
 function renderPlayers(){let saved=players.map((_,p)=>{let e=$("eq"+p);return e?e.textContent:"--"});playersEl.innerHTML="";players.forEach((hand,p)=>{let box=document.createElement("div");box.className="player";box.innerHTML=`<h2>PLAYER ${p+1}</h2>`;let cs=document.createElement("div");cs.className="cards";hand.forEach((c,i)=>cs.appendChild(ce(c,stage==="pre",p,i)));box.appendChild(cs);let eq=document.createElement("div");eq.className="player-equity";eq.id="eq"+p;eq.textContent=saved[p]||"--";box.appendChild(eq);playersEl.appendChild(box)})}
-function showBoard(){be.innerHTML="";board.forEach(c=>be.appendChild(ce(c,false)));for(let i=board.length;i<5;i++){let x=document.createElement("div");x.className="placeholder";x.textContent="?";be.appendChild(x)}}
+function squeezeCard(c,index){let wrap=document.createElement("div");wrap.className="squeeze-card"+(index<revealedBoard?" revealed":"");let face=document.createElement("div");face.className="squeeze-face";face.appendChild(cardFace(c));let cover=document.createElement("div");cover.className="squeeze-cover";wrap.append(face,cover);if(index===revealedBoard){let startY=0,progress=0,active=false;const paint=()=>{let p=Math.max(0,Math.min(1,progress));cover.style.transform=`translateY(${-p*82}%) rotateX(${-p*20}deg)`;cover.style.clipPath=`inset(0 0 ${p*88}% 0)`};const begin=e=>{if(revealBusy)return;active=true;wrap.classList.add("squeezing");startY=e.clientY;progress=0;wrap.setPointerCapture?.(e.pointerId);e.preventDefault()};const move=e=>{if(!active)return;progress=Math.max(0,(startY-e.clientY)/90);paint();e.preventDefault()};const end=async e=>{if(!active)return;active=false;wrap.classList.remove("squeezing");if(progress>=.48){revealBusy=true;revealedBoard++;wrap.classList.add("revealed");cover.style.transform="";cover.style.clipPath="";await afterReveal();revealBusy=false}else{progress=0;paint()}e.preventDefault()};wrap.addEventListener("pointerdown",begin);wrap.addEventListener("pointermove",move);wrap.addEventListener("pointerup",end);wrap.addEventListener("pointercancel",end)}return wrap}
+function showBoard(){be.innerHTML="";board.forEach((c,i)=>be.appendChild(squeezeCard(c,i)));for(let i=board.length;i<5;i++){let x=document.createElement("div");x.className="placeholder";x.textContent="?";be.appendChild(x)}squeezeHelp.textContent=revealedBoard<board.length?"カードを上にスライドして絞る":""}
+async function afterReveal(){showBoard();if(revealedBoard<board.length)return;res.textContent=stage.toUpperCase();await updateEquity();renderPlayers();if(stage==="river"){finalResult();action.textContent="勝負終了";action.disabled=true;random.disabled=false;count.disabled=false}else{action.disabled=false;random.disabled=false;count.disabled=false;action.textContent=stage==="flop"?"TURNを配る":"RIVERを配る"}}
 function allHole(){return players.flat()}function remaining(){let u=new Set([...allHole(),...board].map(key));return makeDeck().filter(c=>!u.has(key(c)))}
-function resetStage(){stage="pre";board=[];showBoard();res.innerHTML="";action.textContent="ALL IN !!";action.disabled=false}
+function resetStage(){stage="pre";board=[];revealedBoard=0;revealBusy=false;showBoard();res.innerHTML="";action.textContent="ALL IN !!";action.disabled=false}
 function deal(){let d=makeDeck();shuffle(d);players=Array.from({length:playerCount},()=>[d.pop(),d.pop()]);resetStage();renderPlayers();updateEquity()}
 function openPick(p,i){if(stage!=="pre")return;editing={p,i};picker.innerHTML="";let used=new Set(allHole().map(key));used.delete(key(players[p][i]));
 suits.forEach(s=>{let row=document.createElement("div");row.className="srow",lab=document.createElement("div");lab.className="slab";lab.textContent=s;if("♥♦".includes(s))lab.style.color="#d52b2b";row.appendChild(lab);ranks.forEach(([rank,value])=>{let b=document.createElement("button");b.className="pick"+("♥♦".includes(s)?" r":"");b.textContent=rank;let c={suit:s,rank,value};b.disabled=used.has(key(c));b.onclick=()=>{players[p][i]=c;modal.classList.remove("open");resetStage();renderPlayers();updateEquity()};row.appendChild(b)});picker.appendChild(row)});modal.classList.add("open")}
@@ -91,7 +245,37 @@ function add(extra){let w=winners(extra).win,share=1/w.length;w.forEach(i=>share
 if(need===0){add([]);setEq(shares,total,"RIVER：勝敗確定");return}
 if(need<=2){for(let x of combos(rem,need))add(x);if(token!==calcToken)return;setEq(shares,total,need===2?"FLOP：残り全組み合わせを正確に計算":"TURN：残り全カードを正確に計算");return}
 const N=20000;for(let n=0;n<N;n++){let pool=rem.slice();shuffle(pool);add(pool.slice(0,need))}if(token!==calcToken)return;setEq(shares,total,"")}
-function finalResult(){let x=winners(),names=x.win.map(i=>"PLAYER "+(i+1));document.querySelectorAll(".player").forEach(el=>el.classList.remove("winner"));x.win.forEach(i=>document.querySelectorAll(".player")[i].classList.add("winner"));if(x.win.length===1)res.innerHTML="🏆 "+names[0]+" WIN !!<span class='hand-name'>"+x.hs[x.win[0]].name+"</span>";else res.innerHTML="🤝 SPLIT POT："+names.join(" / ")+"<span class='hand-name'>"+x.hs[x.win[0]].name+"</span>"}
-async function nextStage(){action.disabled=true;random.disabled=true;count.disabled=true;if(stage==="pre"){deck=remaining();shuffle(deck);board.push(deck.pop(),deck.pop(),deck.pop());stage="flop";showBoard();res.textContent="FLOP";await updateEquity();action.textContent="TURNをめくる"}else if(stage==="flop"){board.push(deck.pop());stage="turn";showBoard();res.textContent="TURN";await updateEquity();action.textContent="RIVERをめくる"}else if(stage==="turn"){board.push(deck.pop());stage="river";showBoard();res.textContent="RIVER";await updateEquity();renderPlayers();finalResult();action.textContent="勝負終了";action.disabled=true;random.disabled=false;count.disabled=false;return}action.disabled=false;random.disabled=false;renderPlayers()}
+function finalResult(){
+  let x=winners(),names=x.win.map(i=>"PLAYER "+(i+1));
+  document.querySelectorAll(".player").forEach(el=>{el.classList.remove("winner","seven-two-win");el.querySelector(".horse-track")?.remove()});
+  x.win.forEach(i=>document.querySelectorAll(".player")[i].classList.add("winner"));
+
+  let special72=false;
+  if(x.win.length===1){
+    let wi=x.win[0];
+    let rs=players[wi].map(c=>c.rank).sort();
+    special72=(rs[0]==="2"&&rs[1]==="7");
+    if(special72){
+      let winnerBox=document.querySelectorAll(".player")[wi];
+      winnerBox.classList.add("seven-two-win");
+      winnerBox.querySelector(".horse-track")?.remove();
+      let horseTrack=document.createElement("div");
+      horseTrack.className="horse-track";
+      horseTrack.innerHTML='<span class="horse-runner">🐎</span><span class="horse-runner">🐎</span><span class="horse-runner">🐎</span><span class="horse-runner">🐎</span><span class="horse-runner">🐎</span>';
+      winnerBox.appendChild(horseTrack);
+      let oldOverlay=document.querySelector(".seven-two-overlay");
+      if(oldOverlay)oldOverlay.remove();
+      let ov=document.createElement("div");
+      ov.className="seven-two-overlay";
+      ov.innerHTML='<div class="seven-two-text">🔥 7-2 WIN!! 🔥</div>';
+      document.body.appendChild(ov);
+      setTimeout(()=>ov.remove(),1900);
+    }
+  }
+
+  if(x.win.length===1)res.innerHTML=(special72?"🔥 7-2 SPECIAL WIN!! 🔥<br>":"🏆 ")+names[0]+" WIN !!<span class='hand-name'>"+x.hs[x.win[0]].name+"</span>";
+  else res.innerHTML="🤝 SPLIT POT："+names.join(" / ")+"<span class='hand-name'>"+x.hs[x.win[0]].name+"</span>"
+}
+async function nextStage(){if(revealBusy||revealedBoard<board.length)return;action.disabled=true;random.disabled=true;count.disabled=true;if(stage==="pre"){deck=remaining();shuffle(deck);board.push(deck.pop(),deck.pop(),deck.pop());stage="flop";showBoard();res.textContent="FLOPを絞ってください"}else if(stage==="flop"){board.push(deck.pop());stage="turn";showBoard();res.textContent="TURNを絞ってください"}else if(stage==="turn"){board.push(deck.pop());stage="river";showBoard();res.textContent="RIVERを絞ってください"}action.textContent="絞り中..."}
 count.onchange=()=>{playerCount=+count.value;deal()};random.onclick=deal;action.onclick=nextStage;deal();
 </script></body></html>
