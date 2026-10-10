@@ -54,19 +54,111 @@ button{margin:7px;padding:14px 27px;border:0;border-radius:10px;color:#fff;font-
 
 
 
-/* Baccarat-style squeeze reveal for community cards */
-.squeeze-card{position:relative;width:70px;height:100px;border-radius:9px;perspective:700px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;filter:drop-shadow(0 4px 10px #0006)}
+/* Baccarat-style fold reveal for community cards */
+.squeeze-card{
+  position:relative;
+  width:70px;
+  height:100px;
+  border-radius:9px;
+  perspective:900px;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+  cursor:grab;
+  filter:drop-shadow(0 4px 10px #0006);
+  overflow:visible;
+}
 .squeeze-card:active{cursor:grabbing}
-.squeeze-face{position:absolute;inset:0;width:100%;height:100%;border-radius:9px;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;font-size:25px;font-weight:bold;overflow:hidden;opacity:0;z-index:1;pointer-events:none}
+
+/* Face stays hidden until the user starts bending the card */
+.squeeze-card .squeeze-face{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border-radius:9px;
+  background:#fff;
+  color:#111;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:25px;
+  font-weight:bold;
+  overflow:hidden;
+  opacity:0;
+  z-index:1;
+  pointer-events:none;
+  transition:opacity .08s linear;
+}
 .squeeze-face.red{color:#d52b2b}
-.squeeze-cover{position:absolute;inset:0;border-radius:9px;background:repeating-linear-gradient(45deg,#0d315f 0 8px,#174b88 8px 16px);border:3px solid #e8edf5;box-shadow:inset 0 0 0 2px #ffffff55;transform-origin:bottom center;will-change:transform,clip-path;transition:transform .16s ease-out,clip-path .16s ease-out,opacity .16s ease-out;z-index:2}
-.squeeze-cover::after{content:"♠";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;color:#fff;opacity:.85}
-.squeeze-card.squeezing .squeeze-face,.squeeze-card.revealed .squeeze-face{opacity:1}
+
+/* Back of the card: one-piece soft bend */
+.squeeze-cover{
+  position:absolute;
+  inset:0;
+  border-radius:9px;
+  background:repeating-linear-gradient(45deg,#0d315f 0 8px,#174b88 8px 16px);
+  border:3px solid #e8edf5;
+  box-shadow:
+    inset 0 0 0 2px #ffffff55,
+    0 4px 10px #0005;
+  transform-origin:top center;
+  transform-style:preserve-3d;
+  backface-visibility:hidden;
+  will-change:transform,box-shadow,opacity,border-radius;
+  transition:
+    transform .18s cubic-bezier(.2,.8,.2,1),
+    box-shadow .18s ease,
+    opacity .14s ease,
+    border-radius .18s ease;
+  z-index:2;
+}
+.squeeze-cover::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:38%;
+  border-radius:0 0 7px 7px;
+  background:
+    linear-gradient(to top,
+      rgba(0,0,0,.34) 0%,
+      rgba(255,255,255,.16) 42%,
+      rgba(255,255,255,0) 78%);
+  opacity:.18;
+  pointer-events:none;
+}
+.squeeze-cover::after{
+  content:"♠";
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:34px;
+  color:#fff;
+  opacity:.85;
+  text-shadow:0 2px 5px #0006;
+  transform:translateZ(1px);
+}
+.squeeze-card.squeezing .squeeze-face,
+.squeeze-card.revealed .squeeze-face{opacity:1}
 .squeeze-card.squeezing .squeeze-cover{transition:none}
+.squeeze-card.squeezing .squeeze-cover::before{opacity:.72}
 .squeeze-card.revealed{cursor:default}
-.squeeze-card.revealed .squeeze-cover{transform:translateY(-105%) rotateX(-22deg);clip-path:inset(0 0 100% 0);opacity:0;pointer-events:none}
+.squeeze-card.revealed .squeeze-cover{
+  transform:translateY(-8%) rotateX(112deg) scaleY(.70);
+  border-radius:18px 18px 42px 42px;
+  opacity:0;
+  pointer-events:none;
+}
 .squeeze-help{font-size:12px;color:#aebdb5;margin-top:7px;min-height:15px}
-@media(max-width:700px){.squeeze-card{width:54px;height:78px}.squeeze-face{font-size:19px}.squeeze-cover::after{font-size:28px}}
+@media(max-width:700px){
+  .squeeze-card{width:54px;height:78px}
+  .squeeze-card .squeeze-face{font-size:19px}
+  .squeeze-cover::after{font-size:28px}
+}
 
 
 /* Classic playing-card face */
@@ -277,8 +369,92 @@ function cardFace(c){
 }
 function ce(c,click,p,i){let d=document.createElement("div");d.className="card";d.appendChild(cardFace(c));if(click)d.onclick=()=>openPick(p,i);else d.style.cursor="default";return d}
 function renderPlayers(){let saved=players.map((_,p)=>{let e=$("eq"+p);return e?e.textContent:"--"});playersEl.innerHTML="";players.forEach((hand,p)=>{let box=document.createElement("div");box.className="player";box.innerHTML=`<h2>PLAYER ${p+1}</h2>`;let cs=document.createElement("div");cs.className="cards";hand.forEach((c,i)=>cs.appendChild(ce(c,stage==="pre",p,i)));box.appendChild(cs);let eq=document.createElement("div");eq.className="player-equity";eq.id="eq"+p;eq.textContent=saved[p]||"--";box.appendChild(eq);playersEl.appendChild(box)})}
-function squeezeCard(c,index){let isBig=(index===revealedBoard&&(stage==="turn"||stage==="river"));let wrap=document.createElement("div");wrap.className="squeeze-card"+(index<revealedBoard?" revealed":"")+(isBig?" big-reveal":"");let face=document.createElement("div");face.className="squeeze-face";face.appendChild(cardFace(c));let cover=document.createElement("div");cover.className="squeeze-cover";wrap.append(face,cover);if(index===revealedBoard){let startY=0,progress=0,active=false,dragDistance=isBig?160:90;const paint=()=>{let p=Math.max(0,Math.min(1,progress));cover.style.transform=`translateY(${-p*82}%) rotateX(${-p*20}deg)`;cover.style.clipPath=`inset(0 0 ${p*88}% 0)`};const begin=e=>{if(revealBusy)return;active=true;wrap.classList.add("squeezing");startY=e.clientY;progress=0;wrap.setPointerCapture?.(e.pointerId);e.preventDefault()};const move=e=>{if(!active)return;progress=Math.max(0,(startY-e.clientY)/dragDistance);paint();e.preventDefault()};const end=async e=>{if(!active)return;active=false;wrap.classList.remove("squeezing");if(progress>=.48){revealBusy=true;revealedBoard++;wrap.classList.add("revealed");cover.style.transform="";cover.style.clipPath="";await afterReveal();revealBusy=false}else{progress=0;paint()}e.preventDefault()};wrap.addEventListener("pointerdown",begin);wrap.addEventListener("pointermove",move);wrap.addEventListener("pointerup",end);wrap.addEventListener("pointercancel",end)}return wrap}
-function showBoard(){be.innerHTML="";board.forEach((c,i)=>be.appendChild(squeezeCard(c,i)));for(let i=board.length;i<5;i++){let x=document.createElement("div");x.className="placeholder";x.textContent="?";be.appendChild(x)}squeezeHelp.textContent=revealedBoard<board.length?"カードを上にスライドして絞る":""}
+function squeezeCard(c,index){
+  let isBig=(index===revealedBoard&&(stage==="turn"||stage==="river"));
+  let wrap=document.createElement("div");
+  wrap.className="squeeze-card"+(index<revealedBoard?" revealed":"")+(isBig?" big-reveal":"");
+
+  let face=document.createElement("div");
+  face.className="squeeze-face";
+  face.appendChild(cardFace(c));
+
+  let cover=document.createElement("div");
+  cover.className="squeeze-cover";
+  wrap.append(face,cover);
+
+  if(index===revealedBoard){
+    let startY=0,progress=0,active=false,dragDistance=isBig?190:115;
+
+    const paint=()=>{
+      let p=Math.max(0,Math.min(1,progress));
+
+      // One-piece bend: stronger curvature toward the bottom edge.
+      let angle=p*108;
+      let lift=p*9;
+      let scaleY=1-p*.24;
+      let scaleX=1-p*.035;
+      let skew=p*2.8;
+      let bottomRound=9+p*34;
+
+      cover.style.transform=
+        `translateY(${-lift}%) rotateX(${angle}deg) scaleY(${scaleY}) scaleX(${scaleX}) skewX(${skew}deg)`;
+      cover.style.borderRadius=`9px 9px ${bottomRound}px ${bottomRound}px`;
+      cover.style.boxShadow=
+        `inset 0 0 0 2px #ffffff55, 0 ${5+p*22}px ${12+p*34}px rgba(0,0,0,${.26+p*.30})`;
+    };
+
+    const reset=()=>{
+      progress=0;
+      cover.style.transform="";
+      cover.style.borderRadius="";
+      cover.style.boxShadow="";
+    };
+
+    const begin=e=>{
+      if(revealBusy)return;
+      active=true;
+      wrap.classList.add("squeezing");
+      startY=e.clientY;
+      progress=0;
+      wrap.setPointerCapture?.(e.pointerId);
+      e.preventDefault();
+    };
+
+    const move=e=>{
+      if(!active)return;
+      progress=Math.max(0,(startY-e.clientY)/dragDistance);
+      paint();
+      e.preventDefault();
+    };
+
+    const end=async e=>{
+      if(!active)return;
+      active=false;
+      wrap.classList.remove("squeezing");
+
+      if(progress>=.52){
+        revealBusy=true;
+        revealedBoard++;
+        wrap.classList.add("revealed");
+        cover.style.transform="";
+        cover.style.borderRadius="";
+        cover.style.boxShadow="";
+        await afterReveal();
+        revealBusy=false;
+      }else{
+        reset();
+      }
+      e.preventDefault();
+    };
+
+    wrap.addEventListener("pointerdown",begin);
+    wrap.addEventListener("pointermove",move);
+    wrap.addEventListener("pointerup",end);
+    wrap.addEventListener("pointercancel",end);
+  }
+  return wrap
+}
+function showBoard(){be.innerHTML="";board.forEach((c,i)=>be.appendChild(squeezeCard(c,i)));for(let i=board.length;i<5;i++){let x=document.createElement("div");x.className="placeholder";x.textContent="?";be.appendChild(x)}squeezeHelp.textContent=revealedBoard<board.length?"カードをしならせるように上へ動かす":""}
 async function afterReveal(){showBoard();if(revealedBoard<board.length)return;res.textContent=stage.toUpperCase();await updateEquity();renderPlayers();if(stage==="river"){finalResult();action.textContent="勝負終了";action.disabled=true;random.disabled=false;count.disabled=false}else{action.disabled=false;random.disabled=false;count.disabled=false;action.textContent=stage==="flop"?"TURNを配る":"RIVERを配る"}}
 function allHole(){return players.flat()}function remaining(){let u=new Set([...allHole(),...board].map(key));return makeDeck().filter(c=>!u.has(key(c)))}
 function resetStage(){stage="pre";board=[];revealedBoard=0;revealBusy=false;showBoard();res.innerHTML="";action.textContent="ALL IN !!";action.disabled=false}
